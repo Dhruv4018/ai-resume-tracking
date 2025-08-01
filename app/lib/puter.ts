@@ -25,18 +25,24 @@ declare global {
           imageURL?: string | PuterChatOptions,
           testMode?: boolean,
           options?: PuterChatOptions
-        ) => Promise<Object>;
+        ) => Promise<AIResponse | undefined>;
+
+        feedback: (
+          path:string,
+          message:string
+        ) => Promise<AIResponse | undefined>
+
         img2txt: (
           image: string | File | Blob,
           testMode?: boolean
-        ) => Promise<string>;
+        ) => Promise<string | undefined>
       };
       kv: {
         get: (key: string) => Promise<string | null>;
         set: (key: string, value: string) => Promise<boolean>;
         delete: (key: string) => Promise<boolean>;
         list: (pattern: string, returnValues?: boolean) => Promise<string[]>;
-        flush: () => Promise<boolean>;
+        flush: () => Promise<boolean | undefined>;
       };
     };
   }
@@ -350,7 +356,7 @@ export const usePuterStore = create<PuterStore>((set, get) => {
           ],
         },
       ],
-      { model: "claude-sonnet-4" }
+      { model: "claude-3-7-sonnet" }
     ) as Promise<AIResponse | undefined>;
   };
 

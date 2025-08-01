@@ -7,17 +7,17 @@ export const meta = () => [
   { name: "description", content: "Log into your account" },
 ];
 
-const auth = () => {
+const Auth = () => {
   const { isLoading, auth } = usePuterStore();
-  const location  = useLocation();
-  const next = location.search.split('next=')[1];
+  const location = useLocation();
   const navigate = useNavigate();
-  
 
-  useEffect(()=>{
-    if(auth.isAuthenticated) navigate(next);
-  } , [auth.isAuthenticated , next])
+  const searchParams = new URLSearchParams(location.search);
+  const next = searchParams.get("next") || "/";
 
+  useEffect(() => {
+    if (auth.isAuthenticated) navigate(next);
+  }, [auth.isAuthenticated, next, navigate]);
 
   return (
     <main className="bg-[url('/images/bg-auth.svg')] bg-cover min-h-screen flex items-center justify-center">
@@ -32,18 +32,14 @@ const auth = () => {
               <button className="auth-button animate-pulse">
                 <p>Signing you in...</p>
               </button>
+            ) : auth.isAuthenticated ? (
+              <button className="auth-button" onClick={auth.signOut}>
+                <p>Log Out</p>
+              </button>
             ) : (
-              <>
-                {auth.isAuthenticated ? (
-                  <button className="auth-button " onClick={auth.signOut}>
-                    <p>Log Out</p>
-                  </button>
-                ) : (
-                  <button className="auth-button " onClick={auth.signIn}>
-                    <p> Log In</p>
-                  </button>
-                )}
-              </>
+              <button className="auth-button" onClick={auth.signIn}>
+                <p>Log In</p>
+              </button>
             )}
           </div>
         </section>
@@ -52,4 +48,4 @@ const auth = () => {
   );
 };
 
-export default auth;
+export default Auth;
