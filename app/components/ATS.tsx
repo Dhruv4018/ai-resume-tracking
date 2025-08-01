@@ -1,63 +1,64 @@
-import { p } from "node_modules/@react-router/dev/dist/routes-DHIOx0R9";
-import React from "react";
+import { cn } from "~/lib/utils";
 
-interface Suggestion {
-  type: "good" | "improve";
-  tip: string;
-}
-
-interface ATSProps {
+const ATS = ({
+  score,
+  suggestions,
+}: {
   score: number;
-  suggestions: Suggestion[];
-}
-
-const ATS: React.FC<ATSProps> = ({ score, suggestions }) => {
-  const gradientClass =
-    score > 69
-      ? "from-green-100"
-      : score > 49
-        ? "from-yellow-100"
-        : "from-red-100";
-
-  const iconSrc = score > 69 ? "/icons/ats-good.svg" : "/icons/ats-bad.svg";
-
-  const subtitle =
-    score > 69 ? "Great Job!" : score > 49 ? "Good Start" : "Needs Improvement";
-
+  suggestions: { type: "good" | "improve"; tip: string }[];
+}) => {
   return (
     <div
-      className={`bg-gradient-to-b ${gradientClass} to-white rounded-2xl shadow-md w-full`}
+      className={cn(
+        "rounded-2xl shadow-md w-full bg-gradient-to-b to-light-white p-8 flex flex-col gap-4",
+        score > 69
+          ? "from-green-100"
+          : score > 49
+          ? "from-yellow-100"
+          : "from-red-100"
+      )}
     >
-      <div className="mb-6">
-        <div className="space-y-3">
-          {suggestions.map((suggestion, index) => (
-            <div key={index} className="flex items-start gap-3">
-              <img
-                src={
-                  suggestion.type === "good"
-                    ? "/icons/check.svg"
-                    : "/icons/warning.svg"
-                }
-                alt={suggestion.type === "good" ? "check" : "Warning"}
-                className="w-5 h-5 mt-1"
-              />
-              <p
-                className={
-                  suggestion.type === "good"
-                    ? "text-green-700"
-                    : "text-amber-700"
-                }
-              >
-                {suggestion.tip}
-              </p>
-            </div>
-          ))}
-        </div>
+      <div className="flex flex-row gap-4 items-center">
+        <img
+          src={
+            score > 69
+              ? "/icons/ats-good.svg"
+              : score > 49
+              ? "/icons/ats-warning.svg"
+              : "/icons/ats-bad.svg"
+          }
+          alt="ATS"
+          className="w-10 h-10"
+        />
+        <p className="text-2xl font-semibold">ATS Score - {score}/100</p>
       </div>
-
-      <p className="text-gray-700 italic">
-        keep refining your resume to improve your chances of getting hired
-      </p>
+      <div className="flex flex-col gap-2">
+        <p className="font-medium text-xl">
+          How well does your resume pass through Applicant Tracking Systems?
+        </p>
+        <p className="text-lg text-gray-500">
+          Your resume was scanned like an employer would. Here's how it
+          performed:
+        </p>
+        {suggestions.map((suggestion, index) => (
+          <div className="flex flex-row gap-2 items-center" key={index}>
+            <img
+              src={
+                suggestion.type === "good"
+                  ? "/icons/check.svg"
+                  : "/icons/warning.svg"
+              }
+              alt="ATS"
+              className="w-4 h-4"
+            />
+            <p className="text-lg text-gray-500">{suggestion.tip}</p>
+          </div>
+        ))}
+        <p className="text-lg text-gray-500">
+          Want a better score? Improve your resume by applying the suggestions
+          listed below.
+        </p>
+      </div>
     </div>
   );
 };
