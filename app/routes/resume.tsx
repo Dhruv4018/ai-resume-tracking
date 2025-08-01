@@ -17,14 +17,17 @@ const Resume = () => {
   const [resumeUrl, setResumeUrl] = useState("");
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const navigate = useNavigate();
-   
-    useEffect(() => {
-    // !
-    if ( !isLoading && !auth.isAuthenticated) navigate(`/auth?next=/resume${id}`);
-  }, [isLoading]);
-
 
   useEffect(() => {
+    if (!isLoading && !auth.isAuthenticated) {
+      navigate(`/auth?next=/resume/${id}`);
+    }
+  }, [isLoading, auth.isAuthenticated, id]);
+
+  useEffect(() => {
+    let resumeBlobUrl: string;
+    let imageBlobUrl: string;
+
     const loadResume = async () => {
       const resume = await kv.get(`resume:${id}`);
       if (!resume) return;
@@ -34,21 +37,25 @@ const Resume = () => {
       const resumeBlob = await fs.read(data.resumePath);
       if (!resumeBlob) return;
 
-      const pdfBlob = new Blob([resumeBlob], { type: "application/pdf" });
-      const resumeUrl = URL.createObjectURL(pdfBlob);
-      setResumeUrl(resumeUrl);
+      resumeBlobUrl = URL.createObjectURL(new Blob([resumeBlob], { type: "application/pdf" }));
+      setResumeUrl(resumeBlobUrl);
 
       const imageBlob = await fs.read(data.imagePath);
       if (!imageBlob) return;
 
-      const imageUrl = URL.createObjectURL(imageBlob);
-      setImageUrl(imageUrl);
+      imageBlobUrl = URL.createObjectURL(imageBlob);
+      setImageUrl(imageBlobUrl);
 
       setFeedback(data.feedback);
-      console.log({ resumeUrl, imageUrl, feedback: data.feedback });
+      console.log({ resumeUrl: resumeBlobUrl, imageUrl: imageBlobUrl, feedback: data.feedback });
     };
 
     loadResume();
+
+    return () => {
+      if (resumeBlobUrl) URL.revokeObjectURL(resumeBlobUrl);
+      if (imageBlobUrl) URL.revokeObjectURL(imageBlobUrl);
+    };
   }, [id]);
 
   return (
@@ -76,17 +83,18 @@ const Resume = () => {
             </div>
           )}
         </section>
-        <section className="feedback-section">
-            <h2 className="text-4xl !text-black font-bold">Resume Review</h2>
-            {feedback ? (
-                <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
-                   <Summary feedback= {feedback}/>
-                   <ATS score={feedback.ATS.score || 0}  suggestions={feedback.ATS.tips || []}/>
-                   <Details feedback={feedback}/>
-                </div>
-            ): (
-                <img src="/images/resume-scan-2.gif" className="w-full"  alt="resume-scan"/>
-            )}
+
+        <section className="feedback-section px-4 py-6">
+          <h2 className="text-4xl !text-black font-bold">Resume Review</h2>
+          {feedback ? (
+            <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
+              <Summary feedback={feedback} />
+              <ATS score={feedback.ATS?.score || 0} suggestions={feedback.ATS?.tips || []} />
+              <Details feedback={feedback} />
+            </div>
+          ) : (
+            <img src="/images/resume-scan-2.gif" className="w-full" alt="resume-scan" />
+          )}
         </section>
       </div>
     </main>
