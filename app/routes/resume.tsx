@@ -5,6 +5,15 @@ import Details from "~/components/Details";
 import Summary from "~/components/Summary";
 import { usePuterStore } from "~/lib/puter";
 
+// ✅ TypeScript type for feedback
+interface Feedback {
+  ATS?: {
+    score?: number;
+    tips?: { type: "good" | "improve"; tip: string }[];
+  };
+  // Add other fields as needed
+}
+
 export const meta = () => [
   { title: "Resumind | Review" },
   { name: "description", content: "Detailed overview of your resume" },
@@ -25,8 +34,8 @@ const Resume = () => {
   }, [isLoading, auth.isAuthenticated, id]);
 
   useEffect(() => {
-    let resumeBlobUrl: string;
-    let imageBlobUrl: string;
+    let resumeBlobUrl = "";
+    let imageBlobUrl = "";
 
     const loadResume = async () => {
       const resume = await kv.get(`resume:${id}`);
@@ -86,13 +95,20 @@ const Resume = () => {
 
         <section className="feedback-section px-4 py-6">
           <h2 className="text-4xl !text-black font-bold">Resume Review</h2>
+
           {feedback ? (
             <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
               <Summary feedback={feedback} />
-              <ATS
-                score={feedback?.ATS?.score ?? 0}
-                suggestions={feedback?.ATS?.tips ?? []}
-              />
+
+              {feedback.ATS ? (
+                <ATS
+                  score={feedback.ATS.score ?? 0}
+                  suggestions={feedback.ATS.tips ?? []}
+                />
+              ) : (
+                <p className="text-gray-500">ATS feedback not available.</p>
+              )}
+
               <Details feedback={feedback} />
             </div>
           ) : (
